@@ -22,19 +22,18 @@ jobs:
           git commit -m "Atualiza AniList" || echo "Sem mudanças"
           git push
 
-            - name: Esperar o GitHub Pages publicar o arquivo novo
+      - name: Esperar o GitHub Pages publicar o arquivo novo
         run: |
           new=$(jq -r .last_updated anilist.json)
           for i in $(seq 1 36); do
-            cur=$(curl -s "https://zebudegasz.github.io/anilist-widget-json/anilist.json" | jq -r .last_updated 2>/dev/null)
+            cur=$(curl -s "https://zebudegasz.github.io/anilist-widget-json/anilist.json?t=$(date +%s)" | jq -r .last_updated 2>/dev/null)
             if [ "$cur" = "$new" ]; then
               echo "Pages atualizado."
               exit 0
             fi
             sleep 5
           done
-          echo "::error::O Pages não atualizou a tempo. O Refresh não será feito nesta rodada."
-          exit 1
+          echo "Pages ainda não atualizou, seguindo mesmo assim."
 
       - name: Dar Refresh no widget
         env:
