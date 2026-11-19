@@ -45,7 +45,7 @@ acts = anilist(
           ... on ListActivity {
             status
             progress
-            media { title { romaji } coverImage { medium } }
+            media { title { romaji } coverImage { extraLarge } }
           }
         }
       }
@@ -60,7 +60,7 @@ if acts:
     status = a["status"][:1].upper() + a["status"][1:]
     prog = f" {a['progress']} of" if a.get("progress") else ""
     last_activity = f"Last Activity: {status}{prog} {a['media']['title']['romaji']}"
-    last_image = a["media"]["coverImage"]["medium"]
+    last_image = a["media"]["coverImage"]["extraLarge"]
 
 agora = datetime.now(ZoneInfo("America/Fortaleza")).strftime("%d/%m/%Y %H:%M:%S")
 anime = u["statistics"]["anime"]
