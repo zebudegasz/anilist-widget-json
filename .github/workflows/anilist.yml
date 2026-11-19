@@ -22,16 +22,26 @@ jobs:
           git commit -m "Atualiza AniList" || echo "Sem mudanças"
           git push
 
-      - name: Aguardar o GitHub Pages atualizar
-        run: sleep 120
+      - name: Esperar o GitHub Pages publicar o arquivo novo
+        run: |
+          new=$(jq -r .last_updated anilist.json)
+          for i in $(seq 1 36); do
+            cur=$(curl -s "https://zebudegasz.github.io/anilist-widget-json/anilist.json?t=$(date +%s)" | jq -r .last_updated 2>/dev/null)
+            if [ "$cur" = "$new" ]; then
+              echo "Pages atualizado."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Pages ainda não atualizou, seguindo mesmo assim."
 
-      - name: Publicar o widget
+      - name: Dar Refresh no widget
         env:
+          DW_URL: ${{ secrets.DWIDGETS_URL }}
           DW_COOKIE: ${{ secrets.DWIDGETS_COOKIE }}
           DW_CSRF: ${{ secrets.DWIDGETS_CSRF }}
         run: |
-          code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST \
-            "https://discordwidgets.com/api/widgets/6a46c4ed2566295b81235c11/publish" \
+          code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST "$DW_URL" \
             -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0" \
             -H "Accept: application/json" \
             -H "Content-Type: application/json" \
@@ -40,6 +50,6 @@ jobs:
             -d "{}")
           echo "HTTP $code"
           if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-            echo "::error::Publish falhou (HTTP $code). O cookie pode ter expirado."
+            echo "::error::Refresh falhou (HTTP $code). O cookie pode ter expirado."
             exit 1
           fi
