@@ -1,8 +1,6 @@
 name: Atualizar AniList
 
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -23,3 +21,25 @@ jobs:
           git add anilist.json
           git commit -m "Atualiza AniList" || echo "Sem mudanças"
           git push
+
+      - name: Aguardar o GitHub Pages atualizar
+        run: sleep 120
+
+      - name: Publicar o widget
+        env:
+          DW_COOKIE: ${{ secrets.DWIDGETS_COOKIE }}
+          DW_CSRF: ${{ secrets.DWIDGETS_CSRF }}
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST \
+            "https://discordwidgets.com/api/widgets/6a46c4ed2566295b81235c11/publish" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "X-CSRF-Token: $DW_CSRF" \
+            -H "Cookie: $DW_COOKIE" \
+            -d "{}")
+          echo "HTTP $code"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::Publish falhou (HTTP $code). O cookie pode ter expirado."
+            exit 1
+          fi
