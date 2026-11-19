@@ -1,0 +1,2 @@
+# anilist-widget-json
+:)
