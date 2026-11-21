@@ -71,14 +71,14 @@ acts = anilist(
     {"id": u["id"]},
 )["Page"]["activities"]
 
-last_activity = "Last Activity: -"
+last_activity = "-"
 last_image = ""
 last_seen = "Last Activity: -"
 if acts:
     a = acts[0]
     status = a["status"][:1].upper() + a["status"][1:]
     prog = f" {a['progress']} of" if a.get("progress") else ""
-    last_activity = f"Last Activity: {status}{prog} {a['media']['title']['romaji']}"
+    last_activity = f"{status}{prog} {a['media']['title']['romaji']}"
     last_image = a["media"]["coverImage"]["extraLarge"]
     last_seen = f"Last Activity: {tempo_atras(a['createdAt'])}"
 
